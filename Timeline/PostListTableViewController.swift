@@ -8,7 +8,7 @@
 
 import UIKit
 
-class PostListTableViewController: UITableViewController {
+class PostListTableViewController: UITableViewController, UISearchResultsUpdating {
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -16,6 +16,26 @@ class PostListTableViewController: UITableViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         tableView.reloadData()
+    }
+    
+    func setUpSearchController() {
+        let storybord = UIStoryboard.init(name: "Main", bundle: nil)
+//        let resultsController = storybord.instantiateViewController(withIdentifier: "searchResultsController")
+        
+        let searchController = storybord.instantiateInitialViewController() as? UISearchController
+        searchController?.searchResultsUpdater = self
+        tableView.tableHeaderView = searchController?.searchBar
+    }
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        let storybord = UIStoryboard.init(name: "Main", bundle: nil)
+        let resultsController = storybord.instantiateViewController(withIdentifier: "searchResultsController") as? SearchResultsTableViewController
+        
+        if let searchTerm = searchController.searchBar.text {
+            let filteredPosts = PostController.sharedController.posts.filter { $0.matchesSearchTerm(searchTerm: searchTerm) }
+            resultsController?.resultsArray = filteredPosts
+            tableView.reloadData()
+        }
     }
 
     // MARK: - Table view data source

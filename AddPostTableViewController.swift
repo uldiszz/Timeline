@@ -8,7 +8,7 @@
 
 import UIKit
 
-class AddPostTableViewController: UITableViewController {
+class AddPostTableViewController: UITableViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
 
     @IBOutlet weak var postImageView: UIImageView!
     @IBOutlet weak var selectImageButton: UIButton!
@@ -19,8 +19,34 @@ class AddPostTableViewController: UITableViewController {
     }
     
     @IBAction func selectImageTapped(_ sender: AnyObject) {
+        let imagePicker = UIImagePickerController()
+        imagePicker.delegate = self
+        
+        let actionSheet = UIAlertController(title: "Choose image source", message: nil, preferredStyle: .actionSheet)
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        
+        let photoLibraryAction = UIAlertAction(title: "Photo Library", style: .default) { (_) in
+            imagePicker.sourceType = .photoLibrary
+            self.present(imagePicker, animated: true, completion: nil)
+        }
+        let cameraAction = UIAlertAction(title: "Camera", style: .default) { (_) in
+            imagePicker.sourceType = .camera
+            self.present(imagePicker, animated: true, completion: nil)
+        }
+        
+        actionSheet.addAction(cancelAction)
+        
+        if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
+            actionSheet.addAction(photoLibraryAction)
+        }
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            actionSheet.addAction(cameraAction)
+        }
+        
+        self.present(actionSheet, animated: true, completion: nil)
+        
         selectImageButton.setTitle("", for: .normal)
-        postImageView.image = #imageLiteral(resourceName: "sampleImage")
     }
     
     @IBAction func addPostTapped(_ sender: AnyObject) {

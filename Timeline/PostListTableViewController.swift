@@ -10,31 +10,35 @@ import UIKit
 
 class PostListTableViewController: UITableViewController, UISearchResultsUpdating {
 
+    var searchController: UISearchController?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         tableView.reloadData()
+        setUpSearchController()
     }
+    
+    private var resultsController: SearchResultsTableViewController?
     
     func setUpSearchController() {
         let storybord = UIStoryboard.init(name: "Main", bundle: nil)
-//        let resultsController = storybord.instantiateViewController(withIdentifier: "searchResultsController")
+        resultsController = storybord.instantiateViewController(withIdentifier: "searchResultsController") as? SearchResultsTableViewController
+        resultsController?.sourceTableViewController = self
         
-        let searchController = storybord.instantiateInitialViewController() as? UISearchController
-        searchController?.searchResultsUpdater = self
-        tableView.tableHeaderView = searchController?.searchBar
+        self.searchController = UISearchController(searchResultsController: resultsController)
+        self.searchController?.searchResultsUpdater = self
+
+        tableView.tableHeaderView = self.searchController?.searchBar
     }
     
     func updateSearchResults(for searchController: UISearchController) {
-        let storybord = UIStoryboard.init(name: "Main", bundle: nil)
-        let resultsController = storybord.instantiateViewController(withIdentifier: "searchResultsController") as? SearchResultsTableViewController
-        
         if let searchTerm = searchController.searchBar.text {
             let filteredPosts = PostController.sharedController.posts.filter { $0.matchesSearchTerm(searchTerm: searchTerm) }
             resultsController?.resultsArray = filteredPosts
-            tableView.reloadData()
+            resultsController?.reloadTableView()
         }
     }
 
@@ -67,10 +71,21 @@ class PostListTableViewController: UITableViewController, UISearchResultsUpdatin
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showPost" {
-            guard let nextVC = segue.destination as? PostDetailTableViewController, let indexPath = tableView.indexPathForSelectedRow else { return }
-            let post = PostController.sharedController.posts[indexPath.row]
-            nextVC.post = post
+            if let nextVC = segue.destination as? PostDetailTableViewController {
+                if let indexPath = tableView.indexPathForSelectedRow {
+                    let post = PostController.sharedController.posts[indexPath.row]
+                    nextVC.post = post
+                } else {
+                    guard let cell = sender as? PostTableViewCell,
+                        let searchResultsController = searchController?.searchResultsController as? SearchResultsTableViewController,
+                        let searchResultsTableView = searchResultsController.tableView,
+                        let searchResultsIndexPath = searchResultsTableView.indexPath(for: cell),
+                        let post = searchResultsController.resultsArray[searchResultsIndexPath.row] as? Post else { return }
+                    
+                    nextVC.post = post
+                    searchResultsController.dismiss(animated: true, completion: nil)
+                }
+            }
         }
     }
-
 }

@@ -79,6 +79,7 @@ class PostDetailTableViewController: UIViewController, UITableViewDelegate, UITa
     }
     
     @IBAction func followButtonTapped(_ sender: AnyObject) {
+        
     }
 }
 

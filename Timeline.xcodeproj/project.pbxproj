@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		28128DA01DB5736F00A2B654 /* sampleImage.JPG in Resources */ = {isa = PBXBuildFile; fileRef = 28128D9F1DB5736F00A2B654 /* sampleImage.JPG */; };
 		28128DA21DB583BD00A2B654 /* SearchableRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28128DA11DB583BC00A2B654 /* SearchableRecord.swift */; };
 		288E30F51DB7E64500EE4E20 /* CloudKitSyncable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 288E30F41DB7E64500EE4E20 /* CloudKitSyncable.swift */; };
 		28A2C0BC1DB543B7008828D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A2C0BB1DB543B7008828D4 /* AppDelegate.swift */; };
@@ -28,7 +27,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		28128D9F1DB5736F00A2B654 /* sampleImage.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = sampleImage.JPG; sourceTree = "<group>"; };
 		28128DA11DB583BC00A2B654 /* SearchableRecord.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchableRecord.swift; sourceTree = "<group>"; };
 		288E30F41DB7E64500EE4E20 /* CloudKitSyncable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CloudKitSyncable.swift; sourceTree = "<group>"; };
 		28A2C0B81DB543B7008828D4 /* Timeline.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Timeline.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -91,7 +89,6 @@
 				28A2C0DD1DB548C7008828D4 /* Model Controllers */,
 				28A2C0D11DB54512008828D4 /* View Controllers */,
 				28A2C0C21DB543B7008828D4 /* Assets.xcassets */,
-				28128D9F1DB5736F00A2B654 /* sampleImage.JPG */,
 				28A2C0C41DB543B7008828D4 /* LaunchScreen.storyboard */,
 				28A2C0C71DB543B7008828D4 /* Info.plist */,
 			);
@@ -217,7 +214,6 @@
 				28A2C0C61DB543B7008828D4 /* LaunchScreen.storyboard in Resources */,
 				28A2C0C31DB543B7008828D4 /* Assets.xcassets in Resources */,
 				28A2C0C11DB543B7008828D4 /* Main.storyboard in Resources */,
-				28128DA01DB5736F00A2B654 /* sampleImage.JPG in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

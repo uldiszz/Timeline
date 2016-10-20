@@ -12,17 +12,18 @@ import CloudKit
 
 class Post: SearchableRecord, CloudKitSyncable {
     
+    static let kRecordType = "Post"
     let kPhotoURL = "PhotoURL"
     let ktimestamp = "Timestamp"
     
     var photoData: Data?
     var timestamp: Date
-    var comments: [Comment]?
+    var comments: [Comment] = []
     
     var recordType: String { return "Post" }
     var cloudKitRecordID: CKRecordID?
     
-    var temporaryPhotoURL: URL {
+    fileprivate var temporaryPhotoURL: URL {
         // Must write to temporary directory to be able to pass image file path url to CKAsset
         let temporaryDirectory = NSTemporaryDirectory()
         let temporaryDirectoryURL = URL(fileURLWithPath: temporaryDirectory)
@@ -36,7 +37,7 @@ class Post: SearchableRecord, CloudKitSyncable {
         
         return fileURL
     }
-    
+
     var photo: UIImage {
         guard let data = photoData, let image = UIImage(data: data) else { return UIImage() }
         return image
@@ -57,8 +58,7 @@ class Post: SearchableRecord, CloudKitSyncable {
     }
     
     func matchesSearchTerm(searchTerm: String) -> Bool {
-        guard let comments = self.comments else { return false }
-        for comment in comments {
+        for comment in self.comments {
             if comment.text.lowercased().contains(searchTerm.lowercased()) { return true }
         }
         return false
@@ -67,10 +67,11 @@ class Post: SearchableRecord, CloudKitSyncable {
 
 extension CKRecord {
     convenience init(post: Post) {
-        self.init(recordType: post.recordType, recordID: post.cloudKitRecordID!)
+        self.init(recordType: post.recordType)
         
-        let record = CKRecord(recordType: post.recordType)
-        record.setValue(post.timestamp, forKey: post.ktimestamp)
-        record.setValue(post.temporaryPhotoURL, forKey: post.kPhotoURL)
+        let asset = CKAsset(fileURL: post.temporaryPhotoURL)
+        self[post.kPhotoURL] = asset
+        self[post.ktimestamp] = post.timestamp as CKRecordValue?
+
     }
 }

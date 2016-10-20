@@ -21,6 +21,11 @@ class PostDetailTableViewController: UIViewController, UITableViewDelegate, UITa
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 40
         updateWithPost()
+        NotificationCenter.default.addObserver(self, selector: #selector(commentsWereUpdated), name: PostController.postCommentsChangedNotification, object: post)
+    }
+    
+    func commentsWereUpdated() {
+        self.tableView.reloadData()
     }
     
     func updateWithPost() {
@@ -28,13 +33,13 @@ class PostDetailTableViewController: UIViewController, UITableViewDelegate, UITa
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return post?.comments?.count ?? 0
+        return post?.comments.count ?? 0
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "commentCell", for: indexPath)
 
-        let comment = post?.comments?[indexPath.row]
+        let comment = post?.comments[indexPath.row]
         cell.textLabel?.text = comment?.text
         if let timestamp = comment?.timestamp {
             let formatter = DateFormatter()
@@ -69,7 +74,7 @@ class PostDetailTableViewController: UIViewController, UITableViewDelegate, UITa
     }
     
     @IBAction func shareButtonTapped(_ sender: AnyObject) {
-        let activityController =  UIActivityViewController(activityItems: [post?.photo, post?.comments?.first], applicationActivities: nil)
+        let activityController =  UIActivityViewController(activityItems: [post?.photo, post?.comments.first], applicationActivities: nil)
         self.present(activityController, animated: true, completion: nil)
     }
     

@@ -48,9 +48,9 @@ class CloudKitManager {
         let recordInfo = CKUserIdentityLookupInfo(userRecordID: recordID)
         let operation = CKDiscoverUserIdentitiesOperation(userIdentityLookupInfos: [recordInfo])
         
-        var userIdenties = [CKUserIdentity]()
+        var userIdentities = [CKUserIdentity]()
         operation.userIdentityDiscoveredBlock = { (userIdentity, _) in
-            userIdenties.append(userIdentity)
+            userIdentities.append(userIdentity)
         }
         operation.discoverUserIdentitiesCompletionBlock = { (error) in
             if let error = error {
@@ -59,7 +59,7 @@ class CloudKitManager {
                 return
             }
             
-            let nameComponents = userIdenties.first?.nameComponents
+            let nameComponents = userIdentities.first?.nameComponents
             completion(nameComponents?.givenName, nameComponents?.familyName)
         }
         
@@ -255,7 +255,7 @@ class CloudKitManager {
         }
     }
     
-    func fetchSubscription(_ subscriptionID: String, completion: ((_ subscription: CKSubscription?, _ error: Error?) -> Void)?) {
+    func fetchSubscriptionWith(_ subscriptionID: String, completion: ((_ subscription: CKSubscription?, _ error: Error?) -> Void)?) {
         
         publicDatabase.fetch(withSubscriptionID: subscriptionID) { (subscription, error) in
             

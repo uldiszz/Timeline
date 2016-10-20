@@ -31,11 +31,14 @@ class Comment: SearchableRecord, CloudKitSyncable {
     
     required init?(record: CKRecord) {
         guard let timestamp = record.value(forKey: kTimestamp) as? Date,
-             let text = record.value(forKey: kText) as? String else { return nil }
+             let text = record.value(forKey: kText) as? String,
+             let postReference = record.value(forKey: kPost) as? CKReference else { return nil }
         
         self.text = text
         self.timestamp = timestamp
         self.cloudKitRecordID = record.recordID
+        let matchingPost = PostController.sharedController.posts.filter({$0.cloudKitRecordID == postReference.recordID}).first
+        self.post =  matchingPost
     }
     
     func matchesSearchTerm(searchTerm: String) -> Bool {
@@ -46,12 +49,11 @@ class Comment: SearchableRecord, CloudKitSyncable {
 
 extension CKRecord {
     convenience init(comment: Comment) {
-        self.init(recordType: comment.recordType, recordID: comment.cloudKitRecordID!)
+        self.init(recordType: comment.recordType)
         
-        let record = CKRecord(recordType: comment.recordType)
-        record.setValue(comment.text, forKey: comment.kText)
-        record.setValue(comment.timestamp, forKey: comment.kTimestamp)
+        self[comment.kText] = comment.text as CKRecordValue?
+        self[comment.kTimestamp] = comment.timestamp as CKRecordValue?
         let postReference = CKReference(recordID: (comment.post?.cloudKitRecordID)!, action: .none)
-        record.setValue(postReference, forKey: comment.kPost)
+        self[comment.kPost] = postReference
     }
 }

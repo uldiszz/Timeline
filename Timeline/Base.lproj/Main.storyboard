@@ -55,6 +55,12 @@
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <refreshControl key="refreshControl" opaque="NO" multipleTouchEnabled="YES" contentMode="center" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" id="4Td-bz-KgG">
+                        <autoresizingMask key="autoresizingMask"/>
+                    </refreshControl>
+                    <connections>
+                        <outlet property="refreshControlOutlet" destination="4Td-bz-KgG" id="2It-F1-ZTF"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Zyo-ki-wVN" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -72,11 +78,12 @@
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="postCell" rowHeight="199" id="E3e-Y9-o9g" customClass="PostTableViewCell" customModule="Timeline" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="28" width="375" height="199"/>
                                 <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="E3e-Y9-o9g" id="hyi-Go-avD">
-                                    <frame key="frameInset" width="375" height="198"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="E3e-Y9-o9g" id="hyi-Go-avD">
+                                    <frame key="frameInset" width="375" height="198.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="zgu-y5-CXN">
+                                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zgu-y5-CXN">
+                                            <frame key="frameInset" width="1000" height="1000"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="199" id="a9U-no-ytb"/>
                                             </constraints>
@@ -119,7 +126,7 @@
                                         <rect key="frame" x="0.0" y="99" width="375" height="199"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="tJW-bb-iak" id="BPC-Cn-MKl">
-                                            <frame key="frameInset" width="375" height="198"/>
+                                            <frame key="frameInset" width="375" height="198.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DK5-2H-aN5">
@@ -347,8 +354,12 @@
         <scene sceneID="WHq-c2-BKs">
             <objects>
                 <viewController id="Qvt-5K-CfO" customClass="PhotoSelectViewController" customModule="Timeline" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="9dn-5h-88v"/>
+                        <viewControllerLayoutGuide type="bottom" id="xhV-3G-Oi4"/>
+                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="0jg-oG-vXY">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="198"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="198.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2FU-g5-r6t">

@@ -14,9 +14,14 @@ class PostController {
     
     static var sharedController = PostController()
     
+    static let postsChangedNotification = Notification.Name("PostsChangedNotification")
+    static let postCommentsChangedNotification = Notification.Name("PostCommentsChangedNotification")
+    
     var posts: [Post] = [] {
         didSet {
-            
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: PostController.postsChangedNotification, object: self)
+            }
         }
     }
     
@@ -31,8 +36,6 @@ class PostController {
     func createPost(image: UIImage, caption: String) {
         guard let imageData = UIImageJPEGRepresentation(image, 1.0) else { return }
         let post = Post(photoData: imageData)
-        addCommentToPost(text: caption, post: post)
-        posts.append(post)
         
         let postRecord = CKRecord(post: post)
         cloudKitManager.saveRecord(postRecord) { (record, error) in
@@ -40,19 +43,24 @@ class PostController {
                 NSLog("Error saving post to cloud kit: \(error)")
             }
             post.cloudKitRecordID = record?.recordID
+            self.addCommentToPost(text: caption, post: post)
+            self.posts.append(post)
         }
     }
     
     func addCommentToPost(text: String, post: Post) {
         let comment = Comment(text: text, post: post)
-        post.comments?.append(comment)
+        post.comments.append(comment)
         
-        let commentRrecord = CKRecord(comment: comment)
-        cloudKitManager.saveRecord(commentRrecord) { (record, error) in
+        let commentRecord = CKRecord(comment: comment)
+        cloudKitManager.saveRecord(commentRecord) { (record, error) in
             if let error = error {
                 NSLog("Error saving comment to cloud kit: \(error)")
             }
             comment.cloudKitRecordID = record?.recordID
+        }
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: PostController.postCommentsChangedNotification, object: self)
         }
     }
     
@@ -60,7 +68,7 @@ class PostController {
         var records: [CloudKitSyncable] = []
         posts.forEach { (post) in
             if post.cloudKitRecordID != nil { records.append(post) }
-            post.comments?.forEach { (comment) in
+            post.comments.forEach { (comment) in
                 if comment.cloudKitRecordID != nil { records.append(comment) }
             }
         }
@@ -71,7 +79,7 @@ class PostController {
         var records: [CloudKitSyncable] = []
         posts.forEach { (post) in
             if post.cloudKitRecordID == nil { records.append(post) }
-            post.comments?.forEach { (comment) in
+            post.comments.forEach { (comment) in
                 if comment.cloudKitRecordID == nil { records.append(comment) }
             }
         }
@@ -79,15 +87,27 @@ class PostController {
     }
     
     func fetchNewRecords(type: String, completion: @escaping ((Error?) -> Void) = { _ in }) {
+        var predicate: NSPredicate!
+        
         let exclude: [CKReference] = syncedRecords(type: type).flatMap { $0.cloudKitReference }
-        let predicate = exclude.count > 0 ? NSPredicate(format: "NOT(recordID IN %@)", argumentArray: exclude) : NSPredicate(value: true)
+        predicate = NSPredicate(format: "NOT(recordID IN %@)", argumentArray: [exclude])
+        
+        if exclude.isEmpty {
+            predicate = NSPredicate(value: true)
+        }
         
         cloudKitManager.fetchRecordsWithType(type, predicate: predicate, recordFetchedBlock: { (record) in
             switch type {
             case Post.kRecordType:
-                let _ = Post(record: record)
+                guard let post = Post(record: record) else { return }
+                self.posts.append(post)
             case Comment.kRecordType:
-                let _ = Comment(record: record)
+                guard let comment = Comment(record: record),
+                    let postReference = record.value(forKey: comment.kPost) as? CKReference else { return }
+                let matchingPost = PostController.sharedController.posts.filter({$0.cloudKitRecordID == postReference.recordID}).first
+                
+                matchingPost?.comments.append(comment)
+
             default:
                 NSLog("Unsupported type to fetch")
             }
@@ -121,12 +141,12 @@ class PostController {
         cloudKitManager.saveRecords(unsavedCKRecords, perRecordCompletion: { (record, error) in
             guard let record = record else { return }
             switch record.recordType {
-                case "Post":
-                    let post = dict[record] as? Post
-                    post?.cloudKitRecordID = record.recordID
-                case "Comment":
-                    let comment = dict[record] as? Comment
-                    comment?.cloudKitRecordID = record.recordID
+            case Post.kRecordType:
+                let post = dict[record] as? Post
+                post?.cloudKitRecordID = record.recordID
+            case Comment.kRecordType:
+                let comment = dict[record] as? Comment
+                comment?.cloudKitRecordID = record.recordID
             default:
                 NSLog("Not supported record type: \(record.recordType). Where did you get it?")
             }
@@ -145,18 +165,27 @@ class PostController {
         self.isSyncing = true
         
         pushChangestoCloudKit { (success, error) in
-            self.fetchNewRecords(type: Comment.kRecordType, completion: { (error) in
+            self.fetchNewRecords(type: Post.kRecordType, completion: { (error) in
                 if let error = error {
-                    NSLog("Error performing full sync: \(error)")
-                    completion(error)
+                    NSLog("Error fetching posts: \(error)")
                     self.isSyncing = false
+                    completion(error)
                     return
                 }
+                
+                self.fetchNewRecords(type: Comment.kRecordType, completion: { (error) in
+                    if let error = error {
+                        NSLog("Error fetching comments: \(error)")
+                        self.isSyncing = false
+                        completion(error)
+                        return
+                    }
+                })
+                
                 self.isSyncing = false
                 completion(nil)
             })
         }
-        
     }
 }
 

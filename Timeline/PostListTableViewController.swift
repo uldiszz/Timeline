@@ -12,8 +12,18 @@ class PostListTableViewController: UITableViewController, UISearchResultsUpdatin
 
     var searchController: UISearchController?
     
+    @IBOutlet weak var refreshControlOutlet: UIRefreshControl!
+    
+    private var resultsController: SearchResultsTableViewController?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        fullSync()
+        NotificationCenter.default.addObserver(self, selector: #selector(postsWereUpdated), name: PostController.postsChangedNotification, object: nil)
+    }
+    
+    func postsWereUpdated() {
+        self.tableView.reloadData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -21,7 +31,20 @@ class PostListTableViewController: UITableViewController, UISearchResultsUpdatin
         setUpSearchController()
     }
     
-    private var resultsController: SearchResultsTableViewController?
+    func fullSync(completion: ((Error?) -> Void) = { _ in }) {
+        UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        refreshControlOutlet.beginRefreshing()
+        
+        PostController.sharedController.performFullSync { (error) in
+            if let error = error {
+                NSLog("Error performing full sync: \(error)")
+                return
+            }
+            
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            self.refreshControlOutlet.endRefreshing()
+        }
+    }
     
     func setUpSearchController() {
         let storybord = UIStoryboard.init(name: "Main", bundle: nil)

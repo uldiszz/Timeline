@@ -21,6 +21,11 @@ class PostDetailTableViewController: UIViewController, UITableViewDelegate, UITa
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 40
         updateWithPost()
+        NotificationCenter.default.addObserver(self, selector: #selector(commentsWereUpdated), name: PostController.postCommentsChangedNotification, object: post)
+    }
+    
+    func commentsWereUpdated() {
+        self.tableView.reloadData()
     }
     
     func updateWithPost() {
@@ -69,8 +74,12 @@ class PostDetailTableViewController: UIViewController, UITableViewDelegate, UITa
     }
     
     @IBAction func shareButtonTapped(_ sender: AnyObject) {
+        let activityController =  UIActivityViewController(activityItems: [post?.photo, post?.comments.first], applicationActivities: nil)
+        self.present(activityController, animated: true, completion: nil)
     }
     
     @IBAction func followButtonTapped(_ sender: AnyObject) {
     }
 }
+
+

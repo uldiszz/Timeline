@@ -11,13 +11,19 @@ import UIKit
 class SearchResultsTableViewController: UITableViewController {
 
     var resultsArray: [SearchableRecord] = []
+    var sourceTableViewController: UITableViewController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
     }
     
+    func reloadTableView() {
+        tableView.reloadData()
+    }
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        presentingViewController?.performSegue(withIdentifier: "showPost", sender: self)
+        let cell = tableView.cellForRow(at: indexPath)
+        sourceTableViewController?.performSegue(withIdentifier: "showPost", sender: cell)
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -30,13 +36,5 @@ class SearchResultsTableViewController: UITableViewController {
         cell.updateWithPost(post: post)
         
         return cell
-    }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-//        if segue.identifier == "showPost" {
-//            guard let nextVC = segue.destination as? PostDetailTableViewController, let indexPath = tableView.indexPathForSelectedRow else { return }
-//            let post = resultsArray[indexPath.row]
-//            nextVC.post = post
-//        }
     }
 }

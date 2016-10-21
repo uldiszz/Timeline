@@ -31,6 +31,7 @@ class PostController {
     init() {
         self.cloudKitManager = CloudKitManager()
         performFullSync()
+        subscribeToNewPosts()
     }
     
     func createPost(image: UIImage, caption: String) {
@@ -185,6 +186,75 @@ class PostController {
                 self.isSyncing = false
                 completion(nil)
             })
+        }
+    }
+    
+    func subscribeToNewPosts(completion: @escaping ((Bool, Error?) -> Void) = { _ in }) {
+        cloudKitManager.subscribe(Post.kRecordType, predicate: NSPredicate(value: true), subscriptionID: "SubscribedToAllPosts", contentAvailable: true, alertBody: "New post in Timeline.", options: .firesOnRecordCreation) { (subscription, error) in
+            if let error = error {
+                NSLog("Error subscribing to all posts: \(error)")
+                completion(false, error)
+                return
+            }
+            completion(true, nil)
+        }
+    }
+    
+    func addSubscriptionToPostComments(post: Post, alertBody: String = "New comment", completion: @escaping ((Bool, Error?) -> Void) = { _ in }) {
+        
+        guard let postCloudKitRecordID = post.cloudKitRecordID else { return }
+        
+        let subscriptionID = "SubscribedToPost" + String(describing: post.cloudKitRecordID)
+        
+        let predicate = NSPredicate(format: "Post == %@", postCloudKitRecordID)
+
+        cloudKitManager.subscribe("Comment", predicate: predicate, subscriptionID: subscriptionID, contentAvailable: true, alertBody: alertBody, options: .firesOnRecordCreation) { (_, error) in
+            if let error = error {
+                NSLog("Error subscribing to comment: \(error.localizedDescription)")
+                completion(false, error)
+                return
+            }
+            completion(true, nil)
+        }
+    }
+    
+    func removeSubscriptionToPostcomments(post: Post, completion: @escaping ((Bool, Error?) -> Void) = { _ in }) {
+        let subscriptionID = "SubscribedToPost" + String(describing: post.cloudKitRecordID)
+        cloudKitManager.unsubscribe(subscriptionID) { (success, error) in
+            if let error = error {
+                NSLog("Error unsubscribing from post: \(error.localizedDescription)")
+                completion(false, error)
+                return
+            }
+            completion(true, nil)
+        }
+    }
+    
+    func checkSubscriptionToPostComments(post: Post, completion: @escaping ((Bool) -> Void) = { _ in }) {
+        let subscriptionID = "SubscribedToPost" + String(describing: post.cloudKitRecordID)
+        cloudKitManager.fetchSubscriptionWith(subscriptionID) { (subscription, error) in
+            if let error = error {
+                NSLog("Error fetching subscription: \(error)")
+                completion(false)
+                return
+            }
+            if subscription != nil {
+                completion(true)
+            } else {
+                completion(false)
+            }
+        }
+    }
+    
+    func togglePostCommentSubscription(post: Post, completion: @escaping ((Bool, _ isSubscribed: Bool, _ error: Error?) -> Void) = { _ in }) {
+        checkSubscriptionToPostComments(post: post) { (isSubscribed) in
+            if isSubscribed {
+                self.removeSubscriptionToPostcomments(post: post)
+                completion(true, false, nil)
+            } else {
+                self.addSubscriptionToPostComments(post: post)
+                completion(true, true, nil)
+            }
         }
     }
 }

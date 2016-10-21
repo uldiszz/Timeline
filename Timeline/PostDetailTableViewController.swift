@@ -10,9 +10,15 @@ import UIKit
 
 class PostDetailTableViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
+    @IBOutlet weak var actionsToolbar: UIToolbar!
+    @IBOutlet weak var followButton: UIBarButtonItem!
     @IBOutlet weak var postImaveView: UIImageView!
     @IBOutlet weak var tableView: UITableView!
     var post: Post?
+    
+    override func viewWillAppear(_ animated: Bool) {
+        setFollowButtonsTitle(isSubscribed: nil)
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -79,7 +85,42 @@ class PostDetailTableViewController: UIViewController, UITableViewDelegate, UITa
     }
     
     @IBAction func followButtonTapped(_ sender: AnyObject) {
-        
+        guard let post = post else { return }
+        DispatchQueue.main.async {
+            self.followButton.isEnabled = false
+            PostController.sharedController.togglePostCommentSubscription(post: post) { (success, isSubscribed, error) in
+                if let error = error {
+                    NSLog("Error toggling subscription: \(error)")
+                    return
+                }
+                self.setFollowButtonsTitle(isSubscribed: isSubscribed)
+            }
+        }
+    }
+    
+    func setFollowButtonsTitle(isSubscribed: Bool?) {
+        DispatchQueue.main.async {
+            if let isSubscribed = isSubscribed {
+                if isSubscribed {
+                    self.followButton.isEnabled = true
+                    self.followButton.title = "Unfollow"
+                } else {
+                    self.followButton.isEnabled = true
+                    self.followButton.title = "Follow"
+                }
+            } else {
+                guard let post = self.post else { return }
+                PostController.sharedController.checkSubscriptionToPostComments(post: post, completion: { (isSubscribed) in
+                    if isSubscribed {
+                        self.followButton.isEnabled = true
+                        self.followButton.title = "Unfollow"
+                    } else {
+                        self.followButton.isEnabled = true
+                        self.followButton.title = "Follow"
+                    }
+                })
+            }
+        }
     }
 }
 

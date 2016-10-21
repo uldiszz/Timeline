@@ -56,6 +56,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <refreshControl key="refreshControl" opaque="NO" multipleTouchEnabled="YES" contentMode="center" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" id="4Td-bz-KgG">
+                        <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </refreshControl>
                     <connections>
@@ -252,7 +253,7 @@
                                                     <action selector="shareButtonTapped:" destination="b8g-c1-Utm" id="Bby-VJ-b0G"/>
                                                 </connections>
                                             </barButtonItem>
-                                            <barButtonItem enabled="NO" title="Follow" id="n4A-dk-8Oo">
+                                            <barButtonItem enabled="NO" title="..." id="n4A-dk-8Oo">
                                                 <connections>
                                                     <action selector="followButtonTapped:" destination="b8g-c1-Utm" id="Zfo-vt-Qqd"/>
                                                 </connections>
@@ -308,6 +309,8 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="actionsToolbar" destination="6B5-6d-8YT" id="geS-U1-Yd2"/>
+                        <outlet property="followButton" destination="n4A-dk-8Oo" id="J3O-Ii-NXT"/>
                         <outlet property="postImaveView" destination="cd8-ev-ba2" id="A8z-Bo-4q3"/>
                         <outlet property="tableView" destination="4RI-A9-Afh" id="5lo-jh-O36"/>
                     </connections>
